@@ -114,9 +114,9 @@ export default {
     collisionAvecBoule(bouleOne, bouleTwo) {
       if (!this.firstCollision) {
         this.firstCollision = true;
-        /*this.lancer4Boules = true;
+        this.lancer4Boules = true;
         this.boules.push(this.$refs.twoB);
-        this.boules.push(this.$refs.twoR);*/
+        this.boules.push(this.$refs.twoR);
       }
 
       if (bouleOne.caseTemporary > bouleTwo.caseTemporary) {
