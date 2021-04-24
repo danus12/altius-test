@@ -11,9 +11,11 @@ export default {
   },
   data() {
     return {
+      arrived: false,
       caseTemporary: this.$props.case,
       alreadyCollision: false,
       inCollisionMur: false,
+      inCollisionMurType: undefined,
       sens: undefined,
       rest: true,
       sensChanging: false,
@@ -22,8 +24,6 @@ export default {
   methods: {
     next_position() {
       if (!this.inCollisionMur) {
-        console.log("pas de collision stored");
-        console.log(this.sens);
         switch (this.sens) {
           case BouleSens.ARRIERE:
             this.caseTemporary--;
@@ -45,30 +45,52 @@ export default {
             break;
         }
       } else {
-        console.log("collision stored");
+        this.inCollisionMur = false;
         this.collisionMur();
+        this.inCollisionMurType = undefined;
       }
     },
     collisionMur() {
       switch (this.sens) {
         case BouleSens.OHGAUCHE:
-          this.caseTemporary = this.caseTemporary - this.$parent.N + 1;
-          this.sens = BouleSens.OHDROITE
+            if (this.inCollisionMurType=="haut") {
+                this.caseTemporary = this.caseTemporary + this.$parent.N - 1;
+                this.sens = BouleSens.OBGAUCHE;
+            }else{
+                this.caseTemporary = this.caseTemporary - this.$parent.N + 1;
+                this.sens = BouleSens.OHDROITE;
+            }
           break;
         case BouleSens.OHDROITE:
-            this.sens = BouleSens.OHGAUCHE
-          this.caseTemporary = this.caseTemporary - this.$parent.N - 1;
+            if (this.inCollisionMurType=="haut") {
+                this.sens = BouleSens.OBDROITE;
+                this.caseTemporary = this.caseTemporary + this.$parent.N + 1;
+            }else{
+                this.sens = BouleSens.OHGAUCHE;
+                this.caseTemporary = this.caseTemporary - this.$parent.N - 1;
+            }   
           break;
         case BouleSens.OBDROITE:
-            this.sens = BouleSens.OBGAUCHE
-          this.caseTemporary = this.caseTemporary + (this.$parent.N - 1);
+            if (this.inCollisionMurType=="bas") {
+                this.sens = BouleSens.OHDROITE;
+                this.caseTemporary = this.caseTemporary - this.$parent.N + 1;
+            
+            }else{
+                this.sens = BouleSens.OBGAUCHE;
+                this.caseTemporary = this.caseTemporary + (this.$parent.N - 1);
+            }
+          
           break;
         case BouleSens.OBGAUCHE:
-            this.sens = BouleSens.OBDROITE
-          this.caseTemporary = this.caseTemporary + (this.$parent.N + 1);
+            if (this.inCollisionMurType=="bas") {
+                this.sens = BouleSens.OHGAUCHE;
+                this.caseTemporary = this.caseTemporary - this.$parent.N - 1;
+            }else{
+                this.sens = BouleSens.OBDROITE;
+                this.caseTemporary = this.caseTemporary + (this.$parent.N + 1);
+            }
           break;
       }
-      this.inCollisionMur = false;
     },
     begin() {
       this.next_position();
@@ -104,16 +126,42 @@ export default {
       console.log(oldVal, newVal);
       this.caseTemporary = newVal;
     },
-    caseTemporary: function (value, old) {
-      console.log(value, old);
+    caseTemporary: function (value,old) {
+        
+        console.log("Value changed : ",value, old);
+      if (
+        !this.rest &&
+        !this.sensChanging &&
+        this.$parent.trousNumbers.indexOf(value) >= 0
+      ) {
+        console.log("arrivée");
+        this.arrived = true;
+        this.rest = true;
+      }
       if (
         !this.rest &&
         this.sens != BouleSens.ARRIERE &&
         this.sens != BouleSens.AVANT &&
         !this.sensChanging
       ) {
-        if (this.$parent.murNumbers.indexOf(value) >= 0) {
+        const indexSearching = this.$parent.murNumbers.indexOf(value);
+        if (indexSearching >= 0) {
           this.inCollisionMur = true;
+          if (indexSearching <= this.$parent.N + 1) {
+            this.inCollisionMurType = "haut";
+          } else if (
+            indexSearching > this.$parent.N + 1 &&
+            indexSearching <= this.$parent.N * 2 - 1
+          ) {
+            this.inCollisionMurType = "droit";
+          } else if (
+            indexSearching >= this.$parent.N * 2 &&
+            indexSearching <= this.$parent.N * 3
+          ) {
+            this.inCollisionMurType = "gauche";
+          } else {
+            this.inCollisionMurType = "bas";
+          }
         }
       }
     },

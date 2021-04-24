@@ -3,7 +3,9 @@
     <div>
       <button style="margin-bottom: 20px;margin-right:5px" @click="lancer2b" :disabled="lancer2bProgressing">
         Lancer les boules
-      </button>
+      </button><br>
+      <span style="margin-bottom: 10px">Nbre de collisions entre les boules : {{collisions/2}}</span>
+      
     </div>
     <div class="content" :style="style">
       <Case
@@ -76,6 +78,8 @@ export default {
       lancer2bProgressing: false,
       boules: [],
       murNumbers: [],
+      collisions:0,
+      trousNumbers: [],
     };
   },
 
@@ -83,6 +87,12 @@ export default {
     this.init();
   },
   methods: {
+    initTrous(){
+      this.trousNumbers.push(1)
+      this.trousNumbers.push(this.N)
+      this.trousNumbers.push(Math.pow(this.N,2))
+      this.trousNumbers.push(this.N*(this.N-1))
+    },
     generateMur() {
       var addNumberInterator = 1;
       for (let index = 1; index <= this.N; index++) {
@@ -99,6 +109,7 @@ export default {
       for (let index = this.N*(this.N-1); index <= Math.pow(this.N,2); index++) {
         this.murNumbers.push(index);
       }
+      console.log(this.murNumbers);
     },
     init() {
       this.generateMur();
@@ -114,9 +125,9 @@ export default {
     collisionAvecBoule(bouleOne, bouleTwo) {
       if (!this.firstCollision) {
         this.firstCollision = true;
-        this.lancer4Boules = true;
+        /*this.lancer4Boules = true;
         this.boules.push(this.$refs.twoB);
-        this.boules.push(this.$refs.twoR);
+        this.boules.push(this.$refs.twoR);*/
       }
 
       if (bouleOne.caseTemporary > bouleTwo.caseTemporary) {
@@ -172,13 +183,14 @@ export default {
                     2
                   ) == 1
                 ) {
+                  this.collisions++
                   this.collisionAvecBoule(this.boules[i], this.boules[j]);
                   break;
                 }
               }
             }
           }
-        }, 2000);
+        }, 1000);
       }
     },
     getReference(key) {
